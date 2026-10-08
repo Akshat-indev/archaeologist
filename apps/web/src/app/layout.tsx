@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Archaeologist — Understand your codebase",
   description:
     "Explore a deterministic, code-grounded map of your repository's structure.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
