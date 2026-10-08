@@ -12,10 +12,23 @@ const API_URL =
 export const apiDocsUrl = new URL("/docs", DIRECT_API_URL).toString();
 export const githubLoginUrl = `${API_URL}/auth/github`;
 
+async function readJson<T>(response: Response, context: string): Promise<T> {
+  const body = await response.text();
+  if (!body.trim()) {
+    throw new Error(`${context}: API returned an empty response (HTTP ${response.status}).`);
+  }
+
+  try {
+    return JSON.parse(body) as T;
+  } catch {
+    throw new Error(`${context}: API returned invalid JSON (HTTP ${response.status}).`);
+  }
+}
+
 export async function getGitHubSession(): Promise<GitHubSession> {
   const response = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
   if (!response.ok) throw new Error("Could not read GitHub sign-in status.");
-  return (await response.json()) as GitHubSession;
+  return readJson<GitHubSession>(response, "Could not read GitHub sign-in status");
 }
 
 export async function logoutGitHub(): Promise<void> {
@@ -27,13 +40,22 @@ export async function logoutGitHub(): Promise<void> {
 }
 
 async function detailFromResponse(response: Response): Promise<string> {
-  const body: unknown = await response.json();
-  return typeof body === "object" &&
-    body !== null &&
-    "detail" in body &&
-    typeof body.detail === "string"
-    ? body.detail
-    : "Analysis failed. Check the API and repository URL.";
+  const body = await response.text();
+  if (!body.trim()) {
+    return `API returned an empty error response (HTTP ${response.status}).`;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(body);
+    return typeof parsed === "object" &&
+      parsed !== null &&
+      "detail" in parsed &&
+      typeof parsed.detail === "string"
+      ? parsed.detail
+      : `Analysis failed (HTTP ${response.status}). Check the API and repository URL.`;
+  } catch {
+    return `API returned a non-JSON error response (HTTP ${response.status}).`;
+  }
 }
 
 export async function analyzeLocalPath(path: string): Promise<AnalysisResponse> {
@@ -48,7 +70,7 @@ export async function analyzeLocalPath(path: string): Promise<AnalysisResponse> 
     throw new Error(await detailFromResponse(response));
   }
 
-  return (await response.json()) as AnalysisResponse;
+  return readJson<AnalysisResponse>(response, "Analysis failed");
 }
 
 export async function startGitHubAnalysis(
@@ -65,7 +87,7 @@ export async function startGitHubAnalysis(
     throw new Error(await detailFromResponse(response));
   }
 
-  return (await response.json()) as AnalysisJobResponse;
+  return readJson<AnalysisJobResponse>(response, "Could not start analysis");
 }
 
 export async function getAnalysisJob(
@@ -76,5 +98,5 @@ export async function getAnalysisJob(
     { credentials: "include" },
   );
   if (!response.ok) throw new Error(await detailFromResponse(response));
-  return (await response.json()) as AnalysisJobResponse;
+  return readJson<AnalysisJobResponse>(response, "Could not read analysis status");
 }
