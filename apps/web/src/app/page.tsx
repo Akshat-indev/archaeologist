@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AnalysisDashboard } from "@/components/analysis/AnalysisDashboard";
 import {
   analyzeLocalPath,
+  apiDocsUrl,
   getAnalysisJob,
   getGitHubSession,
   githubLoginUrl,
@@ -269,7 +270,7 @@ export default function Home() {
 
           <a
             className="header-link"
-            href="http://localhost:8000/docs"
+            href={apiDocsUrl}
             target="_blank"
             rel="noreferrer"
           >

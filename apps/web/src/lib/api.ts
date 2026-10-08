@@ -4,9 +4,12 @@ import type {
   GitHubSession,
 } from "./types";
 
-const API_URL =
+const DIRECT_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_PROXY === "true" ? "/api" : DIRECT_API_URL;
 
+export const apiDocsUrl = new URL("/docs", DIRECT_API_URL).toString();
 export const githubLoginUrl = `${API_URL}/auth/github`;
 
 export async function getGitHubSession(): Promise<GitHubSession> {
