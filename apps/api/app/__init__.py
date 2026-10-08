@@ -1,0 +1,1 @@
+"""Archaeologist API application package."""

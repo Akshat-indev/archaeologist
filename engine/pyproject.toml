@@ -1,0 +1,21 @@
+[project]
+name = "engine"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "tree-sitter>=0.25.2,<0.26",
+    "tree-sitter-javascript>=0.25.0",
+    # Keep the official grammar packages installed locally. The all-in-one
+    # language-pack tries to download grammar binaries at runtime, which is
+    # unreliable in WSL/CI and can hang analysis jobs.
+    "tree-sitter-typescript>=0.23.2",
+]
+
+[project.scripts]
+engine = "engine:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
